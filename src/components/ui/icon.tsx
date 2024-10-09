@@ -37,7 +37,7 @@ export function Icon({
   active,
   ...props
 }: {
-  name: IconName;
+  name: IconName | String;
   className?: string;
   active?: boolean;
 }) {

@@ -1,16 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { SelectToken } from "./SelectToken";
 import { Icon, IconName } from "@/components/ui/icon";
+import { useState } from "react";
 
 export function Transact({
   handleSelect,
   swapTokens,
   hasError,
+  updateTokenAmount,
 }: {
   handleSelect: () => void;
   swapTokens: ISwapToken[];
   hasError: boolean;
+  updateTokenAmount: (
+    index: number,
+    newAmount: number,
+    newCoinAmount: number,
+  ) => void;
 }) {
+  const [loading, setLoading] = useState(false);
+
   return (
     <>
       <div className="flex flex-col space-y-2">
@@ -19,10 +28,18 @@ export function Transact({
             <div className="relative" key={idx}>
               {idx > 0 ? (
                 <div className="absolute -top-4.5 left-1/2 flex h-[28px] w-[42px] -translate-x-1/2 transform items-center justify-center rounded-full bg-[#232323]">
-                  <Icon name="data-transfer" className="text-white/20" />
+                  <Icon name="data-transfer" className="text-white" />
                 </div>
               ) : null}
-              <SelectToken key={idx} token={token} from={idx === 0} />
+              <SelectToken
+                swapTokens={swapTokens}
+                key={idx}
+                token={token}
+                from={idx === 0}
+                updateTokenAmount={updateTokenAmount}
+                loading={loading}
+                setLoading={setLoading}
+              />
             </div>
           ))}
         </div>
@@ -55,8 +72,7 @@ export function Transact({
           onClick={handleSelect}
           size="lg"
           variant="plain"
-          className="mt-2 h-[43px]"
-          rounded="sm"
+          className="mt-1 min-h-[43px]"
         >
           Swap
         </Button>
@@ -71,6 +87,7 @@ interface ISwapToken {
   balance: number;
   tag: string;
   coinAmount: number;
+  tokenIcon: string;
 }
 
 const SWAP_ALERT = {

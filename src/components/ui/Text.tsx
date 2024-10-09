@@ -17,8 +17,8 @@ export function Text({
   return isLoading ? (
     <Skeleton size={skeletonSize} />
   ) : (
-    <p className={className} onClick={onClick}>
+    <span className={className} onClick={onClick}>
       {children}
-    </p>
+    </span>
   );
 }

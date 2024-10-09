@@ -211,7 +211,7 @@ export function TokenCharts({
     <div
       ref={containerRef}
       className={cn(
-        "aspect-square size-full snap-y snap-mandatory overflow-auto rounded-[20px] bg-black p-3.75 font-sans font-semibold text-white",
+        "aspect-square size-full h-[370px] w-[320px] snap-y snap-mandatory overflow-auto rounded-[20px] bg-black p-3.75 font-sans font-semibold text-white",
         {
           "max-h-[172px]": variant === "default",
         },

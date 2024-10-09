@@ -11,9 +11,15 @@ const nextConfig = {
       },
     ];
   },
-  // todo: find out why the hell image optimization isn't working in prod for local images
-  // images: { domains: ["desktop-t.vercel.app", "coin-images.coingecko.com"], unoptimized: true },
-  images: { unoptimized: true },
+  images: {
+    domains: ["nyxia.ai"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

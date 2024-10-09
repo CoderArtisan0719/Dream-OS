@@ -72,38 +72,38 @@ export const getTokenInfo = ({
       label: "Volume",
       info: () => (
         <span className="inline-flex">
-          <p className="text-white">
+          <span className="text-white">
             {formatAmount(
               tokenInfo?.marketData.totalVolume?.[currency] || 0,
               { minimumFractionDigits: 2 },
               currency,
             )}
-          </p>{" "}
+          </span>{" "}
           &nbsp;
-          <p
+          <span
             className={getTrendColor(
               tokenInfo?.marketData.volumeChange24h?.[currency] || 0,
             )}
           >
             {`${formatDigits(tokenInfo?.marketData.volumeChangePercentage24h?.[currency] || 0, { maximumFractionDigits: 2 })}%`}
-          </p>
+          </span>
         </span>
       ),
     },
     {
       label: "Trades",
       info: () => (
-        <span className="inline-flex">
-          <p className="text-white">
+        <span className="inline-flex text-white">
+          <span className="">
             {formatDigits(tokenOverview?.trade24h || 0, {
               notation: "compact",
               minimumFractionDigits: 2,
             })}
-          </p>{" "}
+          </span>{" "}
           &nbsp;
-          <p
+          <span
             className={getTrendColor(tokenOverview?.trade24hChangePercent || 0)}
-          >{`${formatDigits(tokenOverview?.trade24hChangePercent || 0, { maximumFractionDigits: 2 })}%`}</p>
+          >{`${formatDigits(tokenOverview?.trade24hChangePercent || 0, { maximumFractionDigits: 2 })}%`}</span>
         </span>
       ),
     },
@@ -111,23 +111,24 @@ export const getTokenInfo = ({
       label: "Traders",
       info: () => (
         <span className="inline-flex">
-          <p className="text-white">
+          <span className="text-white">
             {formatDigits(tokenOverview?.tradersWalletHistory24h || 0, {
               notation: "compact",
               minimumFractionDigits: 2,
             })}
-          </p>{" "}
+          </span>{" "}
           &nbsp;
-          <p className="text-[#F42B2B]">{`${formatDigits(tokenOverview?.tradersWallet24hChangePercent || 0, { maximumFractionDigits: 2 })}%`}</p>
+          <span className="text-[#F42B2B]">{`${formatDigits(tokenOverview?.tradersWallet24hChangePercent || 0, { maximumFractionDigits: 2 })}%`}</span>
         </span>
       ),
     },
   ],
+
   Security: [
     {
       label: () => (
         <span className="inline-flex items-center space-x-1">
-          <p>Top 10 Holders</p>
+          <span>Top 10 Holders</span>
           <Tooltip label="Top 10 Holders of the token.">
             <Icon
               name="circle-info"
@@ -141,7 +142,7 @@ export const getTokenInfo = ({
     {
       label: () => (
         <span className="inline-flex items-center space-x-1">
-          <p>Mintable</p>
+          <span>Mintable</span>
           <Tooltip label="Mint function enables contract owner to issue more tokens and cause the coin price to plummet. It is extremely risky. However if ownership is renounced, or is changed to a burn address, this function will be disabled.">
             <Icon
               name="circle-info"
@@ -160,7 +161,7 @@ export const getTokenInfo = ({
     {
       label: () => (
         <span className="inline-flex items-center space-x-1">
-          <p>Mutable Info</p>
+          <span>Mutable Info</span>
           <Tooltip label="The token information such as name, logo, website address can be changed by the owner.">
             <Icon
               name="circle-info"
@@ -174,7 +175,7 @@ export const getTokenInfo = ({
     {
       label: () => (
         <span className="inline-flex items-center space-x-1">
-          <p>Ownership Renounced</p>
+          <span>Ownership Renounced</span>
           <Tooltip label="If token ownership is renounced, no one can execute functions such as mint more tokens.">
             <Icon
               name="circle-info"
@@ -193,7 +194,7 @@ export const getTokenInfo = ({
     {
       label: () => (
         <span className="inline-flex items-center space-x-1">
-          <p>Update Authority</p>
+          <span>Update Authority</span>
           <Tooltip label="The token's update authority address.">
             <Icon
               name="circle-info"

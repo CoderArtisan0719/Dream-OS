@@ -4,4 +4,13 @@ export interface ISwapWidget {
   balance: number;
   tag: string;
   coinAmount: number;
+  tokenIcon: string;
+}
+
+export interface TokenOption {
+  logoURI: string;
+  name: string;
+  amount?: number;
+  rate?: number;
+  symbol: string;
 }
