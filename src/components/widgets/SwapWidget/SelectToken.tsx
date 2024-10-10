@@ -36,6 +36,7 @@ export function SelectToken({
   const [pendingValue, setPendingValue] = useState(slider);
   const [inputValue, setInputValue] = useState<string>(coinAmount.toString());
   const debounceTimeout = useRef<NodeJS.Timer | null>(null);
+  const [arrowActive, setArrowActive] = useState(false);
 
   const handleSliderChange = (value: number) => {
     setPendingValue(value);
@@ -295,7 +296,17 @@ export function SelectToken({
           ) : (
             <p className="text-white/40">{`~ ${new Intl.NumberFormat().format(amount)} $`}</p>
           )}
-          <Icon name="data-transfer" className="size-[14px] text-white/60" />
+          <span
+            onMouseDown={() => setArrowActive(true)}
+            onMouseUp={() => setArrowActive(false)}
+            onMouseLeave={() => setArrowActive(false)}
+            className="cursor-pointer"
+          >
+            <Icon
+              name="data-transfer"
+              className={`size-[14px] ${arrowActive ? "text-white" : "text-white/60"}`}
+            />
+          </span>
         </span>
         <div className="flex w-[95px] items-center justify-between text-xs font-medium">
           <p className="text-white/40">Bal</p>

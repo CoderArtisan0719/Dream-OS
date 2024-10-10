@@ -18,7 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        {/* <AuthProvider>{children}</AuthProvider> */}
+        {children}
       </body>
     </html>
   );
