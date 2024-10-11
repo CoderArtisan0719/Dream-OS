@@ -37,6 +37,7 @@ export function SelectToken({
   const [inputValue, setInputValue] = useState<string>(coinAmount.toString());
   const debounceTimeout = useRef<NodeJS.Timer | null>(null);
   const [arrowActive, setArrowActive] = useState(false);
+  const [conversion, setConversion] = useState(true);
 
   const handleSliderChange = (value: number) => {
     setPendingValue(value);
@@ -222,8 +223,17 @@ export function SelectToken({
         );
         console.log("secondtokenout", secondTokenOut);
       } else {
+        setLoading(false);
       }
     }, 300);
+  };
+
+  const convertCurrency = () => {
+    setArrowActive(true);
+    setConversion((prev) => !prev);
+    conversion
+      ? setInputValue(amount.toString())
+      : setInputValue(coinAmount.toString());
   };
 
   return (
@@ -241,6 +251,7 @@ export function SelectToken({
       </p>
       <div className="mb-2.5 mt-2.25 flex justify-between">
         <span className="flex flex-row text-3xl font-semibold">
+          {conversion ? "" : <sup className="mt-6 text-md">$</sup>}
           <span className="invisible absolute" id="amount-span">
             {inputValue || "0"}
           </span>
@@ -251,7 +262,7 @@ export function SelectToken({
             ></div>
           ) : (
             <input
-              value={from ? inputValue : coinAmount}
+              value={from ? inputValue : conversion ? coinAmount : amount}
               type="text"
               onChange={(e) => {
                 changeAmountInput(e.target.value);
@@ -294,13 +305,20 @@ export function SelectToken({
               style={{ width: "50px", height: "1em" }}
             ></div>
           ) : (
-            <p className="text-white/40">{`~ ${new Intl.NumberFormat().format(amount)} $`}</p>
+            <>
+              {conversion ? (
+                <p className="text-white/40">{`~ ${new Intl.NumberFormat().format(amount)} $`}</p>
+              ) : (
+                <p className="text-white/40">{`~ ${new Intl.NumberFormat().format(coinAmount)} ${tag}`}</p>
+              )}
+            </>
           )}
           <span
-            onMouseDown={() => setArrowActive(true)}
+            onMouseDown={convertCurrency}
             onMouseUp={() => setArrowActive(false)}
             onMouseLeave={() => setArrowActive(false)}
             className="cursor-pointer"
+            hidden={!from}
           >
             <Icon
               name="data-transfer"
