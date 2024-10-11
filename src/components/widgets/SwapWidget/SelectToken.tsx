@@ -224,8 +224,8 @@ export function SelectToken({
             (secondTokenOut.amount / 10 ** secondTokenOut.decimals).toFixed(3),
           ),
         );
-        console.log("secondtokenout", secondTokenOut);
       } else {
+        updateTokenAmount(0, calculatedAmount, inputFloat);
         setLoading(false);
       }
     }, 300);
@@ -311,14 +311,7 @@ export function SelectToken({
         setLoading(false);
         return; // Limit input to a maximum of 3
       }
-      // Update toToken state
-      // setToToken((prev) => ({
-      //   ...prev,
-      //   coinAmount: inputValue,
-      //   amount: calculatedAmount,
-      // }));
 
-      // Proceed with the second API call if necessary
       if (updateTokenAmount && swapTokens[1]) {
         const { estimation: secondEstimation } = await getTokenOut({
           chainId: "7565164",
@@ -342,8 +335,9 @@ export function SelectToken({
             (secondTokenOut.amount / 10 ** secondTokenOut.decimals).toFixed(3),
           ),
         );
-        console.log("secondtokenout", secondTokenOut);
       } else {
+        updateTokenAmount(0, inputFloat, calculatedAmount);
+        setConversion(false);
         setLoading(false);
       }
     }, 300);
@@ -355,10 +349,6 @@ export function SelectToken({
     conversion
       ? setInputValue(amount.toString())
       : setInputValue(coinAmount.toString());
-  };
-
-  const formatNumberWithCommas = (num: number) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
@@ -387,13 +377,7 @@ export function SelectToken({
             ></div>
           ) : (
             <input
-              value={
-                from
-                  ? inputValue
-                  : conversion
-                    ? coinAmount
-                    : formatNumberWithCommas(amount)
-              }
+              value={from ? inputValue : conversion ? coinAmount : amount}
               type="text"
               onChange={(e) => {
                 conversion
@@ -450,6 +434,7 @@ export function SelectToken({
             onMouseDown={convertCurrency}
             onMouseUp={() => setArrowActive(false)}
             onMouseLeave={() => setArrowActive(false)}
+            onMouseOver={() => setArrowActive(true)}
             className="cursor-pointer"
             hidden={!from}
           >
@@ -484,9 +469,7 @@ export function SelectToken({
             max="100"
             value={pendingValue}
             onChange={({ currentTarget }) => {
-              // conversion
               handleSliderChange(parseFloat(currentTarget.value));
-              // : handleSliderConvertChange(parseFloat(currentTarget.value));
             }}
             className="slider relative z-10 size-full appearance-none bg-transparent focus:outline-none"
           />
