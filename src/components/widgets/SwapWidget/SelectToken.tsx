@@ -57,12 +57,13 @@ export function SelectToken({
           updateTokenAmount(1, 0, 0);
           updateTokenAmount(0, 0, 0);
         }
-
         return;
       }
 
       let temp = (toToken.balance * value) / 100;
-      setInputValue(temp.toString());
+      conversion
+        ? setInputValue(temp.toString())
+        : updateTokenAmount(0, 0, temp);
       setLoading(true); // Start loading
 
       const { estimation } = await getTokenOut({
@@ -81,7 +82,9 @@ export function SelectToken({
         amount: Number((tokenOut.amount / 10 ** tokenOut.decimals).toFixed(3)),
       });
 
-      setInputValue(temp.toString());
+      conversion
+        ? setInputValue(temp.toString())
+        : setInputValue((tokenOut.amount / 10 ** tokenOut.decimals).toFixed(3));
 
       if (!swapTokens[1]) {
         setLoading(false); // Stop loading
@@ -228,12 +231,134 @@ export function SelectToken({
     }, 300);
   };
 
+  const changeAmountConvertInput = (inputValue: string) => {
+    if (inputValue == "0.") {
+      setSlider(0);
+      setPendingValue(0);
+      setInputValue("0");
+    }
+    const validInput = /^\d*\.?\d*$/.test(inputValue);
+    if (!validInput) {
+      return; // Ignore invalid input
+    }
+
+    const decimalPoints = (inputValue.match(/\./g) || []).length;
+    if (decimalPoints > 1) {
+      return; // Ignore input if more than one decimal point
+    }
+
+    let [integerPart, fractionalPart] = inputValue.split(".");
+
+    if (integerPart === "") {
+      integerPart = "0";
+    } else {
+      // Remove leading zeros from the integer part
+      integerPart = integerPart.replace(/^0+(?!$)/, "");
+      // If integerPart becomes empty after removing zeros, set it to '0'
+      if (integerPart === "") {
+        integerPart = "0";
+      }
+    }
+
+    // Reconstruct the input value
+    inputValue =
+      fractionalPart !== undefined
+        ? `${integerPart}.${fractionalPart}`
+        : integerPart;
+
+    setInputValue(inputValue); // Instant visual feedback
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      if (Number(inputValue) === 0) {
+        updateTokenAmount(0, 0, 0);
+        if (swapTokens[1]) updateTokenAmount(1, 0, 0);
+        setSlider(0);
+        return;
+      }
+
+      const floatRegex = /^-?\d*\.?\d*$/;
+      if (!floatRegex.test(inputValue)) {
+        return; // Invalid float input
+      }
+
+      const inputFloat = Number(inputValue);
+
+      setLoading(true); // Start loading
+      setConversion(true);
+
+      // First API call
+      const { estimation } = await getTokenOut({
+        chainId: "1",
+        tokenIn: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        tokenInAmount: `${inputFloat * 10 ** 6}`,
+        tokenOut: "0x0000000000000000000000000000000000000000",
+      });
+
+      const { tokenOut } = estimation;
+      const calculatedAmount = parseFloat(
+        (tokenOut.amount / 10 ** tokenOut.decimals).toFixed(3),
+      );
+
+      if (calculatedAmount > 3) {
+        const newPendingValue = Number((calculatedAmount / 3).toFixed(3)) * 100;
+        setPendingValue(newPendingValue);
+        setSlider(newPendingValue);
+        setConversion(false);
+        setLoading(false);
+        return; // Limit input to a maximum of 3
+      }
+      // Update toToken state
+      // setToToken((prev) => ({
+      //   ...prev,
+      //   coinAmount: inputValue,
+      //   amount: calculatedAmount,
+      // }));
+
+      // Proceed with the second API call if necessary
+      if (updateTokenAmount && swapTokens[1]) {
+        const { estimation: secondEstimation } = await getTokenOut({
+          chainId: "7565164",
+          tokenIn: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          tokenInAmount: `${Number(inputValue) * 10 ** 6}`,
+          tokenOut: "11111111111111111111111111111111",
+        });
+        setLoading(false); // Stop loading
+        setConversion(false);
+
+        const newPendingValue = Number((calculatedAmount / 3).toFixed(3)) * 100;
+        setPendingValue(newPendingValue);
+        setSlider(newPendingValue);
+
+        const secondTokenOut = secondEstimation.tokenOut;
+        updateTokenAmount(0, inputFloat, calculatedAmount);
+        updateTokenAmount(
+          1,
+          inputFloat,
+          parseFloat(
+            (secondTokenOut.amount / 10 ** secondTokenOut.decimals).toFixed(3),
+          ),
+        );
+        console.log("secondtokenout", secondTokenOut);
+      } else {
+        setLoading(false);
+      }
+    }, 300);
+  };
+
   const convertCurrency = () => {
     setArrowActive(true);
     setConversion((prev) => !prev);
     conversion
       ? setInputValue(amount.toString())
       : setInputValue(coinAmount.toString());
+  };
+
+  const formatNumberWithCommas = (num: number) => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
@@ -255,17 +380,25 @@ export function SelectToken({
           <span className="invisible absolute" id="amount-span">
             {inputValue || "0"}
           </span>
-          {loading && !from ? (
+          {loading && (!from || !conversion) ? (
             <div
               className="skeleton-loader"
               style={{ width: "50px", height: "1em" }}
             ></div>
           ) : (
             <input
-              value={from ? inputValue : conversion ? coinAmount : amount}
+              value={
+                from
+                  ? inputValue
+                  : conversion
+                    ? coinAmount
+                    : formatNumberWithCommas(amount)
+              }
               type="text"
               onChange={(e) => {
-                changeAmountInput(e.target.value);
+                conversion
+                  ? changeAmountInput(e.target.value)
+                  : changeAmountConvertInput(e.target.value);
               }}
               className="px-0 py-0 text-3xl focus:outline-none"
               style={{
@@ -299,7 +432,7 @@ export function SelectToken({
       </div>
       <div className="flex items-center justify-between">
         <span className="flex space-x-1.5 text-xs">
-          {loading ? (
+          {loading && conversion ? (
             <div
               className="skeleton-loader"
               style={{ width: "50px", height: "1em" }}
@@ -350,9 +483,11 @@ export function SelectToken({
             min="0"
             max="100"
             value={pendingValue}
-            onChange={({ currentTarget }) =>
-              handleSliderChange(parseFloat(currentTarget.value))
-            }
+            onChange={({ currentTarget }) => {
+              // conversion
+              handleSliderChange(parseFloat(currentTarget.value));
+              // : handleSliderConvertChange(parseFloat(currentTarget.value));
+            }}
             className="slider relative z-10 size-full appearance-none bg-transparent focus:outline-none"
           />
           <span className="absolute right-2 text-xs font-semibold text-white">{`${slider}%`}</span>
